@@ -1,0 +1,13 @@
+services:
+  dev:
+    build: .
+    image: modern-python-base:latest
+    container_name: python-dev-base
+    volumes:
+      - ../workspace:/workspace
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    environment:
+      - PYTHONPATH=/workspace
+      - PYTHONUNBUFFERED=1

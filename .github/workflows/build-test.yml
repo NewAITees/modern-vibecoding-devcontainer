@@ -1,0 +1,75 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-base-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build base image
+        run: |
+          cd base
+          docker build -t modern-python-base:latest .
+
+      - name: Test base image
+        run: |
+          docker run --rm modern-python-base:latest python --version
+          docker run --rm modern-python-base:latest uv --version
+          docker run --rm modern-python-base:latest ruff --version
+          docker run --rm modern-python-base:latest pytest --version
+
+  test-templates:
+    runs-on: ubuntu-latest
+    needs: test-base-image
+    strategy:
+      matrix:
+        template: [minimal]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build base image
+        run: |
+          cd base
+          docker build -t modern-python-base:latest .
+
+      - name: Test template creation
+        run: |
+          ./scripts/create-project.sh test-${{ matrix.template }} ${{ matrix.template }}
+
+      - name: Verify template files
+        run: |
+          cd ../test-${{ matrix.template }}
+          ls -la
+          test -f Dockerfile
+          test -f pyproject.toml
+
+  test-scripts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Test script permissions
+        run: |
+          test -x scripts/create-project.sh
+          test -x scripts/update-base.sh
+          test -x scripts/install.sh
+          test -x base/build.sh
+
+      - name: Test create-project script help
+        run: |
+          ./scripts/create-project.sh || test $? -eq 1  # Should fail with usage message
