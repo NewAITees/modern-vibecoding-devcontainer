@@ -20,8 +20,13 @@ COPY --from=node-stage /usr/local/lib/node_modules /usr/local/lib/node_modules
 COPY --from=node-stage /usr/local/include/node /usr/local/include/node
 COPY --from=node-stage /usr/local/share/man/man1/node* /usr/local/share/man/man1/
 
-# Install uv
-RUN pip install uv
+# Install uv and basic system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    curl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && pip install uv
 
 # Set working directory
 WORKDIR /workspace
@@ -31,7 +36,21 @@ RUN useradd -m -s /bin/bash dev
 RUN chown -R dev:dev /workspace
 USER dev
 
-# Note: Python development tools will be installed later to avoid disk space issues
+# Install common Python development tools in user space
+RUN pip install --user \
+    pre-commit \
+    pytest \
+    pytest-cov \
+    pytest-mock \
+    ruff \
+    black \
+    mypy \
+    vulture \
+    safety \
+    bandit
+
+# Note: CLI tools (Claude Code, Gemini CLI) will be installed post-startup
+# Run the setup script after container startup to install CLI tools securely
 # See docs/CLI_INSTALLATION.md for installation instructions
 
 # Default command

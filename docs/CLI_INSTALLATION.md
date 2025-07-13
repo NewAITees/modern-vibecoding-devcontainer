@@ -35,22 +35,22 @@ set -e
 
 echo "🚀 Installing CLI tools..."
 
-# Install Node.js
-if ! command -v node &> /dev/null; then
-    echo "📦 Installing Node.js..."
-    curl -fsSL https://nodejs.org/dist/v20.11.0/node-v20.11.0-linux-x64.tar.xz | tar -xJ -C /usr/local --strip-components=1
-fi
+# Set up npm configuration for user-local installation
+echo "📦 Setting up npm configuration..."
+mkdir -p ~/.npm-global
+npm config set prefix '~/.npm-global'
+export PATH="~/.npm-global/bin:$PATH"
 
 # Install Claude Code CLI
-if ! command -v claude-code &> /dev/null; then
+if ! command -v claude &> /dev/null; then
     echo "🤖 Installing Claude Code CLI..."
-    curl -fsSL https://claude.ai/claude-code/install.sh | bash
+    npm install -g @anthropic-ai/claude-code@latest
 fi
 
 # Install Gemini CLI
 if ! command -v gemini &> /dev/null; then
     echo "💎 Installing Gemini CLI..."
-    npm install -g @google/generative-ai-cli
+    npm install -g @google/gemini-cli@latest
 fi
 
 # Install additional Python tools
@@ -64,8 +64,11 @@ echo "  - python $(python --version)"
 echo "  - uv $(uv --version)"
 echo "  - node $(node --version)"
 echo "  - npm $(npm --version)"
-echo "  - claude-code (if installed successfully)"
-echo "  - gemini (if installed successfully)"
+echo "  - claude (Claude Code CLI)"
+echo "  - gemini (Gemini CLI)"
+echo ""
+echo "📋 Add to your shell profile:"
+echo "export PATH=\"~/.npm-global/bin:\$PATH\""
 EOF
 
 chmod +x setup-cli.sh

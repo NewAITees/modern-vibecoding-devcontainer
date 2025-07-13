@@ -1,0 +1,36 @@
+services:
+  app:
+    build: .
+    image: "${PROJECT_NAME:-my-project}:latest"
+    container_name: "${PROJECT_NAME:-my-project}-app"
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/workspace
+      - ~/.cache/uv:/home/dev/.cache/uv
+    working_dir: /workspace
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+      - UV_CACHE_DIR=/home/dev/.cache/uv
+      - UV_COMPILE_BYTECODE=1
+    user: dev
+    command: ["uv", "run", "python", "-m", "src.your_package"]
+    
+  dev:
+    build: .
+    image: "${PROJECT_NAME:-my-project}:latest"
+    container_name: "${PROJECT_NAME:-my-project}-dev"
+    volumes:
+      - .:/workspace
+      - ~/.cache/uv:/home/dev/.cache/uv
+    working_dir: /workspace
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+      - UV_CACHE_DIR=/home/dev/.cache/uv
+      - UV_COMPILE_BYTECODE=1
+    user: dev
+    command: ["/bin/bash"]
+    stdin_open: true
+    tty: true

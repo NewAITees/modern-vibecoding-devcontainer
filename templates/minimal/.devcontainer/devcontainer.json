@@ -1,34 +1,39 @@
 {
-  "name": "Python Minimal Development",
-  "build": {
-    "dockerfile": "../Dockerfile",
-    "context": ".."
-  },
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        "ms-python.python",
-        "ms-python.black-formatter",
-        "charliermarsh.ruff",
-        "ms-python.mypy-type-checker",
-        "ms-python.pytest"
-      ],
-      "settings": {
-        "python.defaultInterpreterPath": "/usr/local/bin/python",
-        "python.testing.pytestEnabled": true,
-        "python.testing.unittestEnabled": false,
-        "python.linting.enabled": true,
-        "python.linting.ruffEnabled": true,
-        "python.formatting.provider": "black",
-        "[python]": {
-          "editor.formatOnSave": true,
-          "editor.codeActionsOnSave": {
-            "source.organizeImports": true
-          }
+    "name": "Modern Python Development",
+    "image": "modern-python-base:latest",
+    "containerEnv": {
+        "PYTHONUNBUFFERED": "1",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "UV_CACHE_DIR": "${containerWorkspaceFolder}/.cache/uv",
+        "UV_COMPILE_BYTECODE": "1"
+    },
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "python.defaultInterpreterPath": "/home/dev/.venv/bin/python",
+                "python.testing.pytestEnabled": true,
+                "python.testing.unittestEnabled": false,
+                "python.linting.enabled": true,
+                "python.linting.ruffEnabled": true,
+                "python.formatting.provider": "black",
+                "[python]": {
+                    "editor.formatOnSave": true,
+                    "editor.codeActionsOnSave": {
+                        "source.organizeImports": true
+                    }
+                }
+            },
+            "extensions": [
+                "ms-python.python",
+                "ms-python.black-formatter",
+                "charliermarsh.ruff",
+                "ms-python.mypy-type-checker",
+                "ms-python.pytest",
+                "ms-toolsai.jupyter"
+            ]
         }
-      }
-    }
-  },
-  "postCreateCommand": "uv pip install --system -e .",
-  "remoteUser": "dev"
+    },
+    "postCreateCommand": "uv sync --all-extras --dev",
+    "postStartCommand": "uv run pre-commit install",
+    "remoteUser": "dev"
 }
