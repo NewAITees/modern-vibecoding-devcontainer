@@ -12,13 +12,16 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV UV_CACHE_DIR="/tmp/uv-cache"
 ENV UV_COMPILE_BYTECODE=1
 
-# Copy Node.js binaries and all related files from stage 1 (avoids apt-get issues)
+# Copy complete Node.js installation from stage 1 (avoids apt-get issues)
 COPY --from=node-stage /usr/local/bin/node /usr/local/bin/
 COPY --from=node-stage /usr/local/bin/npm /usr/local/bin/
 COPY --from=node-stage /usr/local/bin/npx /usr/local/bin/
 COPY --from=node-stage /usr/local/lib/node_modules /usr/local/lib/node_modules
 COPY --from=node-stage /usr/local/include/node /usr/local/include/node
 COPY --from=node-stage /usr/local/share/man/man1/node* /usr/local/share/man/man1/
+# Fix npm symlinks
+RUN ln -sf /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm && \
+    ln -sf /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx
 
 # Install uv and basic system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -30,6 +33,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Set working directory
 WORKDIR /workspace
+
+# Install CLI tools globally as root (before creating user)
+RUN npm install -g @anthropic-ai/claude-code@latest || echo "Claude Code installation failed"
+RUN npm install -g @google/gemini-cli@latest || echo "Gemini CLI installation failed"
 
 # Create a non-root user
 RUN useradd -m -s /bin/bash dev
@@ -48,10 +55,6 @@ RUN pip install --user \
     vulture \
     safety \
     bandit
-
-# Note: CLI tools (Claude Code, Gemini CLI) will be installed post-startup
-# Run the setup script after container startup to install CLI tools securely
-# See docs/CLI_INSTALLATION.md for installation instructions
 
 # Default command
 CMD ["/bin/bash"]
