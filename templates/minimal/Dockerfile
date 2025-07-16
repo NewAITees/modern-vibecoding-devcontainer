@@ -1,14 +1,12 @@
 FROM modern-python-base:latest
 
 # Copy project files
-COPY pyproject.toml uv.lock* ./
+COPY pyproject.toml ./
+COPY README.md ./
 COPY src/ ./src/
 COPY tests/ ./tests/
 
-# Install project dependencies
-RUN uv pip install --system -e .
-
-# Install dev dependencies
-RUN uv pip install --system pytest pytest-cov ruff black mypy
+# Dependencies will be installed at runtime with uv run
+# This keeps the image lightweight and allows for dynamic dependency management
 
 CMD ["/bin/bash"]

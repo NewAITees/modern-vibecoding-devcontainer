@@ -24,13 +24,23 @@ services:
     volumes:
       - .:/workspace
       - ~/.cache/uv:/home/dev/.cache/uv
+      - dev-config:/home/dev/.config
+      - dev-npm:/home/dev/.npm-global
     working_dir: /workspace
     environment:
       - PYTHONUNBUFFERED=1
       - PYTHONDONTWRITEBYTECODE=1
       - UV_CACHE_DIR=/home/dev/.cache/uv
       - UV_COMPILE_BYTECODE=1
+      - NPM_CONFIG_PREFIX=/home/dev/.npm-global
+      - PATH=/home/dev/.npm-global/bin:${PATH}
     user: dev
     command: ["/bin/bash"]
     stdin_open: true
     tty: true
+
+volumes:
+  dev-config:
+    name: "${PROJECT_NAME:-my-project}-dev-config"
+  dev-npm:
+    name: "${PROJECT_NAME:-my-project}-dev-npm"

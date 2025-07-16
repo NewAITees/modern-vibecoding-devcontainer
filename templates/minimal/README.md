@@ -10,27 +10,42 @@ A modern Python project template with comprehensive development tools and best p
 - 🔧 **Pre-commit Hooks**: Automated code quality checks
 - 🐳 **Docker Support**: Multi-stage builds and dev containers
 - 🚀 **CI/CD**: GitHub Actions with comprehensive testing
-- 🤖 **AI Integration**: Claude Code ready configuration
+- 🤖 **AI Integration**: Claude Code and Gemini CLI with persistent storage
 
 ## Quick Start
 
 ### Using Docker (Recommended)
 
+#### Option A: Docker Compose with CLI Tools
 ```bash
-# Build and run development environment
+# Build and run development environment with persistent CLI tools
 docker compose up -d dev
 
 # Enter development container
 docker compose exec dev bash
+
+# Install CLI tools (first time only)
+./setup-cli.sh
+
+# Authenticate CLI tools (first time only)
+claude auth login
+gemini auth login
 
 # Install dependencies
 uv sync --all-extras --dev
 
 # Run tests
 uv run pytest
+```
 
-# Run all quality checks
-uv run pre-commit run --all-files
+#### Option B: Enhanced CLI Script
+```bash
+# Start development environment with automatic CLI tool setup
+./run-with-cli.sh
+
+# CLI tools and authentication are automatically persistent
+# Dependencies installation and development can start immediately
+uv sync --all-extras --dev
 ```
 
 ### Local Development
@@ -89,6 +104,8 @@ uv run pre-commit run --all-files
 ├── tests/              # Test files
 ├── docs/               # Documentation
 ├── docker/             # Docker configurations
+├── setup-cli.sh        # CLI tools installation script
+├── run-with-cli.sh     # Enhanced development environment launcher
 ├── pyproject.toml      # Project configuration
 ├── .pre-commit-config.yaml  # Pre-commit hooks
 ├── compose.yml         # Docker Compose services
@@ -131,7 +148,21 @@ docker compose up -d dev
 
 # Execute commands in container
 docker compose exec dev uv run pytest
+
+# CLI tools are persistent across container restarts
+docker compose exec dev claude --version
+docker compose exec dev gemini --version
 ```
+
+### CLI Tools Integration
+
+The template includes two approaches for CLI tool integration:
+
+#### Persistent Storage Benefits
+- 🔧 **Configuration Persistence**: CLI settings preserved across container restarts
+- 🔐 **Authentication Persistence**: Login tokens automatically saved
+- 📦 **Project Isolation**: Each project maintains separate CLI environments
+- ⚡ **Fast Startup**: No re-installation needed after first setup
 
 ### Production Build
 
